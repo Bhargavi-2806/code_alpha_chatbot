@@ -1,33 +1,35 @@
-from flask import Flask, request, jsonify, send_file
-import difflib
+from flask import Flask, request, jsonify, render_template
+from transformers import pipeline
 
 app = Flask(__name__)
 
-# Simple FAQ dataset (you can expand this)
-faqs = {
-    "what is python": "Python is a popular programming language known for its simplicity and versatility.",
-    "what is flask": "Flask is a lightweight Python web framework used to build web applications.",
-    "how to install python": "You can install Python from the official website python.org or using package managers.",
-    "what is github": "GitHub is a platform for hosting and collaborating on code using Git version control."
-}
+# Load a pre-trained Question Answering pipeline
+qa_pipeline = pipeline("question-answering", model="distilbert-base-cased-distilled-squad")
+
+# A context paragraph for the model to answer from
+# You can expand this with more text about topics you want your bot to handle
+context = """
+Python is a programming language widely used for web development, data science, and automation.
+Flask is a lightweight Python web framework used to build web applications.
+GitHub is a platform for hosting and collaborating on code using Git version control.
+Artificial Intelligence (AI) refers to systems that can perform tasks that normally require human intelligence.
+"""
 
 @app.route('/')
 def home():
-    # Serve the frontend.html file
-    return send_file("chatbot.html")
+    return render_template("frontend.html")
 
 @app.route('/chat', methods=['POST'])
 def chat():
     data = request.get_json()
-    question = data.get("question", "").lower()
+    question = data.get("question", "")
 
-    # Find closest matching FAQ
-    closest_match = difflib.get_close_matches(question, faqs.keys(), n=1, cutoff=0.5)
-
-    if closest_match:
-        answer = faqs[closest_match[0]]
-    else:
-        answer = "Sorry, I don't have an answer for that yet."
+    try:
+        # Use the QA pipeline to find an answer
+        result = qa_pipeline(question=question, context=context)
+        answer = result["answer"]
+    except Exception as e:
+        answer = "Sorry, I couldn't process that question."
 
     return jsonify({"answer": answer})
 
