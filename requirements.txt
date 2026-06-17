@@ -1,4 +1,6 @@
 flask
+spacy
 transformers
 torch
-pip install flask transformers torch
+pip install flask spacy transformers torch
+python -m spacy download en_core_web_sm
