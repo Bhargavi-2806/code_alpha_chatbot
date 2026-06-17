@@ -3,20 +3,12 @@ from transformers import pipeline
 
 app = Flask(__name__)
 
-# Load a pre-trained Question Answering pipeline
-qa_pipeline = pipeline("question-answering", model="distilbert-base-cased-distilled-squad")
-
-# A context paragraph for the model to answer from
-# You can expand this with more text about topics you want your bot to handle
-context = """
-Python is a programming language widely used for web development, data science, and automation.
-Flask is a lightweight Python web framework used to build web applications.
-GitHub is a platform for hosting and collaborating on code using Git version control.
-Artificial Intelligence (AI) refers to systems that can perform tasks that normally require human intelligence.
-"""
+# Load a text generation model (GPT-2)
+generator = pipeline("text-generation", model="gpt2")
 
 @app.route('/')
 def home():
+    # Flask looks inside the 'templates' folder for chatbot.html
     return render_template("chatbot.html")
 
 @app.route('/chat', methods=['POST'])
@@ -25,9 +17,9 @@ def chat():
     question = data.get("question", "")
 
     try:
-        # Use the QA pipeline to find an answer
-        result = qa_pipeline(question=question, context=context)
-        answer = result["answer"]
+        # Generate a response using GPT-2
+        result = generator(question, max_length=100, num_return_sequences=1)
+        answer = result[0]["generated_text"]
     except Exception as e:
         answer = "Sorry, I couldn't process that question."
 
