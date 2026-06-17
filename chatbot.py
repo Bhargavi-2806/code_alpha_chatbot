@@ -17,7 +17,7 @@ Artificial Intelligence (AI) refers to systems that can perform tasks that norma
 
 @app.route('/')
 def home():
-    return render_template("frontend.html")
+    return render_template("chatbot.html")
 
 @app.route('/chat', methods=['POST'])
 def chat():
