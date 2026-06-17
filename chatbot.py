@@ -14,7 +14,7 @@ faqs = {
 @app.route('/')
 def home():
     # Serve the frontend.html file
-    return send_file("frontend.html")
+    return send_file("chatbot.html")
 
 @app.route('/chat', methods=['POST'])
 def chat():
